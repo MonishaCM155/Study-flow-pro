@@ -4,13 +4,16 @@
   "description": "StudyFlow Pro – Production Backend (Express + Prisma + SQLite)",
   "main": "server.js",
   "type": "module",
+
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
     "setup": "node setup.js",
     "start:all": "node start-all.js"
   },
+
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
@@ -24,5 +27,9 @@
     "uuid": "^14.0.0",
     "web-push": "^3.6.7",
     "ws": "^8.20.0"
+  },
+
+  "devDependencies": {
+    "prisma": "^5.22.0"
   }
 }
