@@ -1,0 +1,114 @@
+// prisma/schema.prisma
+// StudyFlow Pro — Database Schema
+// Supports SQLite for development, switch datasource to postgresql for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("Student")
+  avatar    String?
+  subjects  String   @default("[]") // JSON array
+  goals     String   @default("[]") // JSON array
+  streak    Int      @default(0)
+  pushSub   String?  // JSON web push subscription
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tasks         Task[]
+  alarms        Alarm[]
+  notes         Note[]
+  sentInvites   FriendInvite[] @relation("InviteSender")
+  receivedInvites FriendInvite[] @relation("InviteReceiver")
+  friendsA      Friendship[]   @relation("FriendA")
+  friendsB      Friendship[]   @relation("FriendB")
+  chatMessages  ChatMessage[]
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @default("")
+  subject     String   @default("Personal")
+  priority    String   @default("medium") // low | medium | high
+  status      String   @default("todo")   // todo | in-progress | completed
+  deadline    DateTime
+  estimate    Int      @default(45)       // minutes
+  tracked     Int      @default(0)        // minutes tracked
+  assignee    String   @default("")
+  tags        String   @default("[]")     // JSON array
+  subtasks    String   @default("[]")     // JSON array of {id,title,done}
+  recurrence  String   @default("none")   // none | daily | weekly | monthly
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alarm       Alarm?
+}
+
+model Alarm {
+  id        String   @id @default(uuid())
+  label     String
+  when      DateTime
+  repeat    String   @default("once") // once | daily | weekly
+  active    Boolean  @default(true)
+  fired     Boolean  @default(false)
+  taskId    String?  @unique
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  content   String   @default("")
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+}
+
+model FriendInvite {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("InviteSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String?
+  receiver   User?    @relation("InviteReceiver", fields: [receiverId], references: [id], onDelete: SetNull)
+  email      String
+  name       String
+  group      String   @default("")
+  status     String   @default("pending") // pending | accepted | declined
+  token      String   @unique
+  createdAt  DateTime @default(now())
+}
+
+model Friendship {
+  id      String @id @default(uuid())
+  userAId String
+  userA   User   @relation("FriendA", fields: [userAId], references: [id], onDelete: Cascade)
+  userBId String
+  userB   User   @relation("FriendB", fields: [userBId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userAId, userBId])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      String   @default("global")
+  createdAt DateTime @default(now())
+}

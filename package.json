@@ -1,0 +1,16 @@
+{
+  "name": "studyflow-pro",
+  "version": "1.0.0",
+  "description": "StudyFlow Pro — Full-Stack Production App",
+  "private": true,
+  "scripts": {
+    "install:all": "cd backend && npm install",
+    "setup": "cd backend && npm install && node setup.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd backend && node serve-frontend.js",
+    "dev": "cd backend && node start-all.js",
+    "start": "cd backend && node start-all.js",
+    "db:studio": "cd backend && npx prisma studio",
+    "db:reset": "cd backend && npx prisma migrate reset --force"
+  }
+}
