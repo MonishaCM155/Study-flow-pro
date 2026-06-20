@@ -1594,7 +1594,13 @@ async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
+  const normalizedPath = path.startsWith('/api/')
+    ? path
+    : path.startsWith('/')
+      ? `/api${path}`
+      : `/api/${path}`;
+
+  const res = await fetch(`${API_BASE_URL}${normalizedPath}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401) {
@@ -2021,7 +2027,7 @@ async function dropTask(event, newStatus) {
   const id = event.dataTransfer.getData('id');
   if (!id) return;
   try {
-    const data = await apiPut(`/tasks/${id}`, { status: newStatus });
+    const data = await apiPut(`/api/tasks/${id}`, { status: newStatus });
     tasks = tasks.map(t => t.id === id ? data.task : t);
     renderAll();
     showNotif('success', 'Task Updated', `Moved to ${newStatus.replace('-', ' ')}`);
@@ -2035,7 +2041,7 @@ async function toggleTaskDone(id) {
   if (!t) return;
   const newStatus = t.status === 'completed' ? 'todo' : 'completed';
   try {
-    const data = await apiPut(`/tasks/${id}`, { status: newStatus });
+    const data = await apiPut(`/api/tasks/${id}`, { status: newStatus });
     tasks = tasks.map(t => t.id === id ? data.task : t);
     renderAll();
   } catch (err) {
@@ -2148,7 +2154,7 @@ async function toggleSubtask(taskId, idx, done) {
   const subtasks = [...(t.subtasks || [])];
   subtasks[idx] = { ...subtasks[idx], done };
   try {
-    const data = await apiPut(`/tasks/${taskId}`, { subtasks });
+    const data = await apiPut(`/api/tasks/${taskId}`, { subtasks });
     tasks = tasks.map(t => t.id === taskId ? data.task : t);
     renderTaskBoard();
     renderActiveTask();
@@ -2159,7 +2165,7 @@ async function toggleSubtask(taskId, idx, done) {
 
 async function changeStatus(id, status) {
   try {
-    const data = await apiPut(`/tasks/${id}`, { status });
+    const data = await apiPut(`/api/tasks/${id}`, { status });
     tasks = tasks.map(t => t.id === id ? data.task : t);
     renderAll();
     showNotif('success', 'Updated', `Task marked as ${status}`);
@@ -2172,7 +2178,7 @@ async function trackTime(id) {
   const t = tasks.find(t => t.id === id);
   if (!t) return;
   try {
-    const data = await apiPut(`/tasks/${id}`, { tracked: (t.tracked || 0) + 25 });
+    const data = await apiPut(`/api/tasks/${id}`, { tracked: (t.tracked || 0) + 25 });
     tasks = tasks.map(t => t.id === id ? data.task : t);
     renderActiveTask();
     renderMetrics();
@@ -2187,7 +2193,7 @@ async function deleteActiveTask() {
   const t = tasks.find(t => t.id === activeTaskId);
   if (!t || !confirm(`Delete "${t.title}"?`)) return;
   try {
-    await apiDelete(`/tasks/${activeTaskId}`);
+    await apiDelete(`/api/tasks/${activeTaskId}`);
     tasks = tasks.filter(t => t.id !== activeTaskId);
     activeTaskId = null;
     renderAll();
@@ -2219,7 +2225,7 @@ async function aiBreakdown() {
     { id: uid(), title: 'Final check and submit', done: false },
   ];
   try {
-    const data = await apiPut(`/tasks/${t.id}`, { subtasks });
+    const data = await apiPut(`/api/tasks/${t.id}`, { subtasks });
     tasks = tasks.map(tk => tk.id === t.id ? data.task : tk);
     renderActiveTask();
     renderTaskBoard();
@@ -3555,7 +3561,7 @@ function toggleMobileSidebar() {
   const inviteToken = urlParams.get('token');
   if (inviteToken) {
     try {
-      const data = await apiPost(`/friends/accept/${inviteToken}`, {});
+      const data = await apiPost(`/api/friends/accept/${inviteToken}`, {});
       if (data.requiresRegistration) {
         document.getElementById('rg-email').value = data.inviteEmail || '';
         document.getElementById('rg-name').value = data.inviteName || '';
