@@ -24,7 +24,7 @@ console.log(c.bold(`
 ╔══════════════════════════════════════════════╗
 ║          StudyFlow Pro — Starting Up         ║
 ╠══════════════════════════════════════════════╣
-║  API:      http://localhost:3001             ║
+║ API: https://study-flow-pro.onrender.com/api |           ║
 ║  Frontend: http://localhost:3000             ║
 ║  WS Chat:  ws://localhost:3001/ws/chat       ║
 ╚══════════════════════════════════════════════╝
@@ -67,7 +67,7 @@ setTimeout(() => {
 
    Open your browser → http://localhost:3000
 
-   API Health → http://localhost:3001/api/health
+   API Health → https://study-flow-pro.onrender.com/api
    DB Studio  → Run: npm run db:studio
 `)));
 }, 2000);

@@ -1,6 +1,3 @@
-# Dockerfile — StudyFlow Pro Backend
-# Multi-stage build for lean production image
-
 # ── Stage 1: Dependencies ──────────────────────
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -22,27 +19,33 @@ RUN npx prisma generate
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
+# install system deps
 RUN apk add --no-cache dumb-init wget
 
-# Non-root user
+# create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 studyflow
 
-# Copy built artifacts
+# create writable DB directory (IMPORTANT FIX)
+RUN mkdir -p /data && chown -R studyflow:nodejs /data
+
+# copy node modules + app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY . .
 
-# Run migrations on startup via entrypoint
+# entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# switch user AFTER fixing permissions
 USER studyflow
 
-EXPOSE 3001
+# IMPORTANT: move DB here (fix EACCES)
+ENV DB_FILE=/data/studyflow.db
 
+EXPOSE 3001
 ENV NODE_ENV=production
 
 ENTRYPOINT ["dumb-init", "--", "docker-entrypoint.sh"]
