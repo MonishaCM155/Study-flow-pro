@@ -2660,7 +2660,7 @@ async function subscribeToPush() {
 
     const sw = await navigator.serviceWorker.ready;
     // Get VAPID public key from server
-    const keyData = await apiGet('/push/vapid-key');
+    const keyData = await apiGet('/api/push/vapid-key');
     if (!keyData.key) { showNotif('alarm', 'VAPID Not Configured', 'Set VAPID_PUBLIC_KEY in backend .env'); return; }
 
     const sub = await sw.pushManager.subscribe({
@@ -3513,7 +3513,7 @@ function copyIcsUrl() {
 
 async function downloadIcs() {
   try {
-    const res = await fetch(`${API_BASE_URL}/calendar/export`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE_URL}/api/calendar/export`, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Export failed');
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -3555,7 +3555,7 @@ function toggleMobileSidebar() {
   const inviteToken = urlParams.get('token');
   if (inviteToken) {
     try {
-      const data = await fetch(`${API_BASE_URL}/friends/accept/${inviteToken}`).then(r => r.json());
+      const data = await apiPost(`/friends/accept/${inviteToken}`, {});
       if (data.requiresRegistration) {
         document.getElementById('rg-email').value = data.inviteEmail || '';
         document.getElementById('rg-name').value = data.inviteName || '';
