@@ -1782,7 +1782,7 @@ async function enterApp() {
 ══════════════════════════════════════ */
 async function loadTasks() {
   try {
-    const data = await apiGet('/tasks');
+    const data = await apiGet('/api/tasks');
     tasks = data.tasks || [];
   } catch (err) {
     showNotif('error', 'Tasks', err.message);
@@ -1791,7 +1791,7 @@ async function loadTasks() {
 
 async function loadAlarms() {
   try {
-    const data = await apiGet('/alarms');
+    const data = await apiGet('/api/alarms');
     alarms = data.alarms || [];
   } catch (err) {
     showNotif('error', 'Alarms', err.message);
@@ -1800,7 +1800,7 @@ async function loadAlarms() {
 
 async function loadFriends() {
   try {
-    const data = await apiGet('/friends');
+    const data = await apiGet('/api/friends');
     friends = data.friends || [];
     invites = data.invites || [];
   } catch (err) {
@@ -1810,7 +1810,7 @@ async function loadFriends() {
 
 async function loadNotes() {
   try {
-    const data = await apiGet('/notes');
+    const data = await apiGet('/api/notes');
     document.getElementById('notes-area').value = data.content || '';
     updateNotesStats();
   } catch (err) {
@@ -2062,7 +2062,7 @@ async function submitAddTask() {
   const tags = document.getElementById('at-tags').value.split(',').map(t => t.trim()).filter(Boolean);
   setBtnLoading('add-task-btn', true);
   try {
-    const data = await apiPost('/tasks', {
+    const data = await apiPost('/api/tasks', {
       title,
       description: document.getElementById('at-desc').value,
       subject: document.getElementById('at-subj').value,
@@ -2093,7 +2093,7 @@ async function quickAddTask() {
   if (!title) return;
   const deadline = new Date(); deadline.setDate(deadline.getDate() + 7);
   try {
-    const data = await apiPost('/tasks', { title, deadline: deadline.toISOString(), priority: 'medium' });
+    const data = await apiPost('/api/tasks', { title, deadline: deadline.toISOString(), priority: 'medium' });
     tasks.unshift(data.task);
     document.getElementById('quick-title').value = '';
     renderAll();
@@ -2199,7 +2199,7 @@ async function deleteActiveTask() {
 
 async function smartSchedule() {
   try {
-    const data = await apiPost('/tasks/smart-schedule', {});
+    const data = await apiPost('/api/tasks/smart-schedule', {});
     await loadTasks();
     renderAll();
     showNotif('success', 'Smart Scheduled', `${data.updated} tasks optimized by deadline priority!`);
@@ -2329,7 +2329,7 @@ async function addAlarm() {
   const taskId = document.getElementById('al-task').value || null;
   setBtnLoading('add-alarm-btn', true);
   try {
-    const data = await apiPost('/alarms', { label, when: when.toISOString(), repeat: document.getElementById('al-repeat').value, taskId });
+    const data = await apiPost('/api/alarms', { label, when: when.toISOString(), repeat: document.getElementById('al-repeat').value, taskId });
     alarms.push(data.alarm);
 
     // Schedule in-browser fallback alarm
@@ -2351,7 +2351,7 @@ async function addAlarm() {
 
 async function deleteAlarm(id) {
   try {
-    await apiDelete(`/alarms/${id}`);
+    await apiDelete(`/api/alarms/${id}`);
     alarms = alarms.filter(a => a.id !== id);
     renderAlarms();
     showNotif('success', 'Alarm Deleted', 'Alarm removed');
@@ -2406,7 +2406,7 @@ function startAlarmPoller() {
   // Poll server for due alarms every 30 seconds (fallback when SW push unavailable)
   alarmPollTimer = setInterval(async () => {
     try {
-      const data = await apiGet('/alarms/due');
+      const data = await apiGet('/api/alarms/due');
       if (data.due && data.due.length > 0) {
         data.due.forEach(alarm => {
           fireLocalAlarm(alarm);
@@ -2495,7 +2495,7 @@ async function addFriend() {
 
   setBtnLoading('invite-btn', true);
   try {
-    const data = await apiPost('/friends/invite', { name, email, group: group || 'Study Group' });
+    const data = await apiPost('/api/friends/invite', { name, email, group: group || 'Study Group' });
     invites.unshift(data.invite);
     closeModal('add-friend-modal');
     renderFriends();
@@ -2519,7 +2519,7 @@ async function addFriend() {
 
 async function cancelInvite(id) {
   try {
-    await apiDelete(`/friends/invite/${id}`);
+    await apiDelete(`/api/friends/invite/${id}`);
     invites = invites.filter(i => i.id !== id);
     renderFriends();
     showNotif('success', 'Invite Cancelled', 'Invite removed');
@@ -2549,7 +2549,7 @@ async function saveNotes() {
   if (!notesDirty) return;
   const content = document.getElementById('notes-area').value;
   try {
-    await apiPut('/notes', { content });
+    await apiPut('/api/notes', { content });
     notesDirty = false;
     const statusEl = document.getElementById('notes-save-status');
     statusEl.textContent = 'Saved ✓';
@@ -2594,7 +2594,7 @@ async function saveSettings() {
 
   setBtnLoading('save-settings-btn', true);
   try {
-    const data = await apiPut('/auth/me', {
+    const data = await apiPut('/api/auth/me', {
       name, email,
       role: document.getElementById('st-role').value,
       subjects: subjects.length ? subjects : currentUser.subjects,
@@ -2806,7 +2806,7 @@ function togglePomo() {
 async function logPomodoroSession(duration, completed) {
   const activeTask = tasks.find(t => t.id === activeTaskId);
   try {
-    const data = await apiPost('/pomodoro/sessions', {
+    const data = await apiPost('/api/pomodoro/sessions', {
       taskId: activeTask?.id || null,
       duration,
       completed,
@@ -2914,7 +2914,7 @@ document.getElementById('li-pass')?.addEventListener('keydown', e => { if (e.key
 ══════════════════════════════════════════════ */
 async function loadGamification() {
   try {
-    gamification = await apiGet('/gamification/profile');
+    gamification = await apiGet('/api/gamification/profile');
   } catch (err) {
     console.warn('Gamification load failed:', err.message);
     gamification = { level: 1, xp: 0, currentLevelXp: 0, nextLevelXp: 100, progressPct: 0, streak: 0, badges: [], lockedBadges: [], totalBadges: 0 };
@@ -2923,7 +2923,7 @@ async function loadGamification() {
 
 async function checkinStreak() {
   try {
-    const data = await apiPost('/gamification/checkin', {});
+    const data = await apiPost('/api/gamification/checkin', {});
     if (data.streak !== undefined && gamification) gamification.streak = data.streak;
     if (data.xpResult?.unlockedBadges?.length || data.unlockedBadges?.length) {
       handleGamificationResult({ unlockedBadges: data.unlockedBadges || data.xpResult?.unlockedBadges, xp: data.xpResult });
@@ -3056,7 +3056,7 @@ async function renderLeaderboard() {
   if (!area) return;
   area.innerHTML = '<div class="empty-col">Loading leaderboard…</div>';
   try {
-    const data = await apiGet('/gamification/leaderboard');
+    const data = await apiGet('/api/gamification/leaderboard');
     const rows = data.leaderboard || [];
     if (rows.length === 0) { area.innerHTML = '<div class="empty-col">No data yet — complete tasks to climb the leaderboard!</div>'; return; }
     area.innerHTML = rows.map(r => `
@@ -3082,7 +3082,7 @@ async function renderAiPriorities() {
   if (!area) return;
   area.innerHTML = '<div class="empty-col">Computing focus scores…</div>';
   try {
-    const data = await apiGet('/ai/priorities');
+    const data = await apiGet('/api/ai/priorities');
     const list = data.tasks || [];
     if (list.length === 0) { area.innerHTML = '<div class="empty-col">No pending tasks — all caught up! 🎉</div>'; return; }
     area.innerHTML = list.slice(0, 8).map((t, i) => `
@@ -3106,7 +3106,7 @@ async function generateStudyPlan() {
   const area = document.getElementById('study-plan-area');
   area.innerHTML = '<div class="empty-col">✦ Generating your personalized study plan…</div>';
   try {
-    const data = await apiPost('/ai/study-plan', { dailyMinutes, days });
+    const data = await apiPost('/api/ai/study-plan', { dailyMinutes, days });
     renderStudyPlan(data);
   } catch (err) {
     area.innerHTML = `<div class="empty-col">Failed to generate plan: ${err.message}</div>`;
@@ -3166,7 +3166,7 @@ async function renderPerformance() {
   if (!area) return;
   area.innerHTML = '<div class="empty-col">Analyzing your performance…</div>';
   try {
-    const data = await apiGet('/ai/performance');
+    const data = await apiGet('/api/ai/performance');
     const preds = data.predictions || [];
     if (preds.length === 0) { area.innerHTML = '<div class="empty-col">Add tasks across subjects to see predictions.</div>'; return; }
 
@@ -3199,7 +3199,7 @@ async function renderPomodoroAnalytics() {
   const area = document.getElementById('pomo-analytics-area');
   if (!area) return;
   try {
-    const data = await apiGet('/pomodoro/analytics?days=14');
+    const data = await apiGet('/api/pomodoro/analytics?days=14');
     const { daily, bySubject, totals } = data;
     if (totals.totalSessions === 0) {
       area.innerHTML = '<div class="empty-col">No Pomodoro sessions yet. Start a focus timer from the Analytics section!</div>';
@@ -3237,7 +3237,7 @@ async function renderPomodoroAnalytics() {
 ══════════════════════════════════════════════ */
 async function loadFlashcards() {
   try {
-    const data = await apiGet('/flashcards');
+    const data = await apiGet('/api/flashcards');
     flashcards = data.flashcards || [];
   } catch (err) {
     console.warn('Flashcards load failed:', err.message);
@@ -3304,7 +3304,7 @@ async function submitAddFlashcard() {
   const subject = document.getElementById('fc-subject').value;
   if (!front || !back) { showNotif('alarm', 'Missing Fields', 'Please fill in both front and back of the card.', 2000); return; }
   try {
-    const data = await apiPost('/flashcards', { front, back, subject });
+    const data = await apiPost('/api/flashcards', { front, back, subject });
     flashcards.unshift(...(data.flashcards || []));
     closeModal('add-flashcard-modal');
     document.getElementById('fc-front').value = '';
@@ -3323,7 +3323,7 @@ async function submitGenerateFlashcards() {
   const subject = document.getElementById('gen-fc-subject').value;
   if (!text) { showNotif('alarm', 'Empty Text', 'Paste some notes first.', 2000); return; }
   try {
-    const data = await apiPost('/flashcards/generate', { text, subject });
+    const data = await apiPost('/api/flashcards/generate', { text, subject });
     if ((data.flashcards || []).length === 0) {
       showNotif('alarm', 'No Cards Generated', data.message || 'Try formatting as "Term: Definition".', 4000);
       return;
@@ -3349,7 +3349,7 @@ async function generateFlashcardsFromNotes() {
 
 async function deleteFlashcard(id) {
   try {
-    await apiDelete(`/flashcards/${id}`);
+    await apiDelete(`/api/flashcards/${id}`);
     flashcards = flashcards.filter(c => c.id !== id);
     renderFlashcards();
   } catch (err) {
@@ -3405,7 +3405,7 @@ function flipReviewCard() { reviewFlipped = true; renderReviewCard(); }
 async function reviewCardAnswer(quality) {
   const card = reviewQueue[reviewIndex];
   try {
-    const data = await apiPost(`/flashcards/${card.id}/review`, { quality });
+    const data = await apiPost(`/api/flashcards/${card.id}/review`, { quality });
     if (data.gamification) handleGamificationResult(data.gamification);
     await loadGamification(); renderGamification();
     // Update local flashcard with new due date
@@ -3469,8 +3469,8 @@ function toggleVoiceInput() {
 /** Sends transcript to AI parser, then auto-creates the task. */
 async function smartParseAndFillQuickAdd(text) {
   try {
-    const { parsed } = await apiPost('/ai/parse-task', { text });
-    const data = await apiPost('/tasks', {
+    const { parsed } = await apiPost('/api/ai/parse-task', { text });
+    const data = await apiPost('/api/tasks', {
       title: parsed.title,
       subject: parsed.subject,
       priority: parsed.priority,
@@ -3492,7 +3492,7 @@ async function smartParseAndFillQuickAdd(text) {
 ══════════════════════════════════════════════ */
 async function exportCalendar() {
   try {
-    const data = await apiGet('/calendar/token');
+    const data = await apiGet('/api/calendar/token');
     document.getElementById('ics-feed-url').value = data.feedUrl;
     openModal('calendar-sync-modal');
   } catch (err) {
