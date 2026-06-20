@@ -420,7 +420,7 @@ pm2 save
 
 ```bash
 # Check email config via health endpoint
-curl http://localhost:3001/api/health
+curl https://study-flow-pro.onrender.com/api
 
 # Expected response:
 {

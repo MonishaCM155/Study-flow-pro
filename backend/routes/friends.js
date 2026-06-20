@@ -43,7 +43,8 @@ router.post('/invite', authMiddleware, async (req,res) => {
     let warning=null;
     try {
       await sendInviteEmail({to:email,toName:name,fromName:req.user.name,group:group||'Study Group',
-        inviteToken:token, appUrl:process.env.FRONTEND_URL||`http://localhost:${process.env.PORT||3001}`});
+        inviteToken:token, appUrl:
+          process.env.FRONTEND_URL || "https://deft-stardust-9e7614.netlify.app/"});
     } catch(emailErr){
       console.warn('[Invite] Email failed:',emailErr.message);
       warning='Invite saved but email delivery failed. Check SMTP config in .env';

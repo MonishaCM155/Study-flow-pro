@@ -177,7 +177,7 @@ export async function sendAlarmReminderEmail({ to, toName, alarmLabel, alarmTime
             <p style="margin:0 0 8px;font-size:16px;color:#d0d4e0">Hey ${toName || 'there'}, time to study!</p>
             <h2 style="margin:0 0 12px;font-size:24px;font-weight:800;color:#fbbf24">${alarmLabel}</h2>
             <p style="margin:0 0 24px;font-size:13px;color:#8892a4">Scheduled for: ${alarmTime}</p>
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}"
+            <a href="${process.env.FRONTEND_URL || 'https://deft-stardust-9e7614.netlify.app/'}"
                style="display:inline-block;background:linear-gradient(135deg,#fbbf24,#f87171);color:#000;text-decoration:none;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px">
               Open StudyFlow Pro →
             </a>

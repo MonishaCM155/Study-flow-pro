@@ -1522,8 +1522,11 @@ textarea.fi{resize:vertical;line-height:1.7;}
 ═══════════════════════════════════════════════ */
 
 /* ── CONFIG ─────────────────────────────────── */
-const API = 'http://localhost:3001/api';
-const WS_URL = 'ws://localhost:3001/ws/chat';
+// Centralized API configuration
+// (Vite-style env vars are supported by the build; falls back to Render URLs.)
+const API = API_BASE_URL;
+const WS_URL = WS_BASE_URL;
+
 
 /* ── STATE ───────────────────────────────────── */
 let token = sessionStorage.getItem('sf-token') || null;
