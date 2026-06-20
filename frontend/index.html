@@ -1616,7 +1616,7 @@ const apiDelete = path => apiFetch(path, { method: 'DELETE' });
 ══════════════════════════════════════ */
 async function checkApiHealth() {
   try {
-    const h = await fetch(`${API_BASE_URL}/health`);
+    const h = await fetch(`${API_BASE_URL}/api/health`);
     const data = await h.json();
     document.getElementById('api-status').textContent = '✓ Backend online';
     document.getElementById('api-status').style.color = 'var(--green)';
