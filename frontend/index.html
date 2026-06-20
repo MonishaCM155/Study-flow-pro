@@ -1515,6 +1515,12 @@ textarea.fi{resize:vertical;line-height:1.7;}
   </div>
 </div>
 
+<script type="module">
+  import { API_BASE_URL, WS_BASE_URL } from './apiConfig.js';
+  window.API_BASE_URL = API_BASE_URL;
+  window.WS_BASE_URL = WS_BASE_URL;
+</script>
+
 <script>
 /* ═══════════════════════════════════════════════
    STUDYFLOW PRO — PRODUCTION JAVASCRIPT ENGINE
@@ -1524,8 +1530,8 @@ textarea.fi{resize:vertical;line-height:1.7;}
 /* ── CONFIG ─────────────────────────────────── */
 // Centralized API configuration
 // (Vite-style env vars are supported by the build; falls back to Render URLs.)
-const API = API_BASE_URL;
-const WS_URL = WS_BASE_URL;
+const API_BASE_URL = window.API_BASE_URL || "https://study-flow-pro.onrender.com";
+const WS_BASE_URL = window.WS_BASE_URL || "wss://study-flow-pro.onrender.com/ws/chat";
 
 
 /* ── STATE ───────────────────────────────────── */
@@ -1588,7 +1594,7 @@ async function apiFetch(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API}${path}`, { ...options, headers });
+  const res = await fetch(`${API_BASE_URL}${path}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
 
   if (res.status === 401) {
@@ -1610,7 +1616,7 @@ const apiDelete = path => apiFetch(path, { method: 'DELETE' });
 ══════════════════════════════════════ */
 async function checkApiHealth() {
   try {
-    const h = await fetch(`${API}/health`);
+    const h = await fetch(`${API_BASE_URL}/health`);
     const data = await h.json();
     document.getElementById('api-status').textContent = '✓ Backend online';
     document.getElementById('api-status').style.color = 'var(--green)';
@@ -2700,7 +2706,7 @@ function connectWebSocket() {
   if (!token) return;
   updateWsStatus('connecting');
 
-  wsConn = new WebSocket(WS_URL);
+  wsConn = new WebSocket(WS_BASE_URL);
 
   wsConn.onopen = () => {
     wsConnected = true;
@@ -3507,7 +3513,7 @@ function copyIcsUrl() {
 
 async function downloadIcs() {
   try {
-    const res = await fetch(`${API}/calendar/export`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${API_BASE_URL}/calendar/export`, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) throw new Error('Export failed');
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -3549,7 +3555,7 @@ function toggleMobileSidebar() {
   const inviteToken = urlParams.get('token');
   if (inviteToken) {
     try {
-      const data = await fetch(`${API}/friends/accept/${inviteToken}`).then(r => r.json());
+      const data = await fetch(`${API_BASE_URL}/friends/accept/${inviteToken}`).then(r => r.json());
       if (data.requiresRegistration) {
         document.getElementById('rg-email').value = data.inviteEmail || '';
         document.getElementById('rg-name').value = data.inviteName || '';
