@@ -20,11 +20,15 @@ export default function authMiddleware(req, res, next) {
       subjects:fromJson(user.subjects,[]), goals:fromJson(user.goals,[]) };
     next();
   } catch(err) {
-    if (err.name==='TokenExpiredError') {
+    if (err.name === 'TokenExpiredError') {
       console.warn('[Auth] expired token');
       return res.status(401).json({error:'Token expired'});
     }
-    console.warn('[Auth] invalid token:', err.message);
-    return res.status(401).json({error:'Invalid token'});
+    if (err.name === 'JsonWebTokenError' || err.name === 'NotBeforeError') {
+      console.warn('[Auth] invalid token:', err.message);
+      return res.status(401).json({error:'Invalid token'});
+    }
+    console.warn('[Auth] unexpected auth error:', err);
+    return res.status(500).json({error:'Authentication failed'});
   }
 }

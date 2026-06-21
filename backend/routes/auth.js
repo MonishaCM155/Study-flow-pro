@@ -7,7 +7,8 @@ import { run, get, toJson, fromJson } from '../db.js';
 import authMiddleware from '../middleware/auth.js';
 
 const router = Router();
-const makeToken = userId => jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
+const tokenTTL = process.env.JWT_EXPIRES_IN || '30d';
+const makeToken = userId => jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: tokenTTL });
 
 export function parseUser(u) {
   if (!u) return null;

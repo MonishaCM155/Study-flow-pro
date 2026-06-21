@@ -1535,7 +1535,10 @@ const WS_BASE_URL = window.WS_BASE_URL || "wss://study-flow-pro.onrender.com/ws/
 
 
 /* ── STATE ───────────────────────────────────── */
-let token = sessionStorage.getItem('sf-token') || null;
+let token = localStorage.getItem('sf-token') || sessionStorage.getItem('sf-token') || null;
+if (token && !localStorage.getItem('sf-token') && sessionStorage.getItem('sf-token')) {
+  localStorage.setItem('sf-token', token);
+}
 let currentUser = null;
 let tasks = [];
 let alarms = [];
@@ -1678,7 +1681,7 @@ async function doLogin() {
     const data = await apiPost('/api/auth/login', { email, password: pass });
     token = data.token;
     currentUser = data.user;
-    sessionStorage.setItem('sf-token', token);
+    localStorage.setItem('sf-token', token);
     await enterApp();
   } catch (err) {
     showAuthErr(err.message);
@@ -1701,7 +1704,7 @@ async function doRegister() {
     const data = await apiPost('/api/auth/register', { name, email, password: pass });
     token = data.token;
     currentUser = data.user;
-    sessionStorage.setItem('sf-token', token);
+    localStorage.setItem('sf-token', token);
     await enterApp();
   } catch (err) {
     showAuthErr(err.message);
@@ -1713,6 +1716,7 @@ async function doRegister() {
 async function doLogout(notify = true) {
   token = null;
   currentUser = null;
+  localStorage.removeItem('sf-token');
   sessionStorage.removeItem('sf-token');
   if (wsConn) { wsConn.close(); wsConn = null; }
   clearInterval(alarmPollTimer);
@@ -1730,6 +1734,7 @@ async function tryAutoLogin() {
     return true;
   } catch {
     token = null;
+    localStorage.removeItem('sf-token');
     sessionStorage.removeItem('sf-token');
     return false;
   }

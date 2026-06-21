@@ -29,7 +29,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (url.pathname.startsWith('/api/')) {
-    // Network-first for API calls
+    // Network-first for API calls; do not serve stale auth responses from cache.
+    // This preserves login state and prevents cached 401/expired token replies.
     event.respondWith(
       fetch(event.request).catch(() =>
         new Response(JSON.stringify({ error: 'Offline — no network' }), {
