@@ -12,5 +12,8 @@
     "start": "cd backend && node start-all.js",
     "db:studio": "cd backend && npx prisma studio",
     "db:reset": "cd backend && npx prisma migrate reset --force"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
   }
 }
