@@ -28,16 +28,16 @@ const app = express();
 const server = http.createServer(app);
 
 app.use(helmet({ contentSecurityPolicy:false, crossOriginEmbedderPolicy:false }));
-const allowedOrigins = [
-  'https://deft-stardust-9e7614.netlify.app'
-];
-app.use(cors({
+const envAllowedOrigins = (process.env.FRONTEND_URL || '').split(',').map(url => url.trim()).filter(Boolean);
+const allowedOrigins = Array.from(new Set([
+  'https://study-flow-pro-1.onrender.com',
+  'https://deft-stardust-9e7614.netlify.app',
+  ...envAllowedOrigins
+]));
+const corsOptions = {
   origin(origin, callback) {
     if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('--deft-stardust-9e7614.netlify.app')
-    ) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     console.warn('[CORS] blocked origin:', origin);
@@ -45,8 +45,11 @@ app.use(cors({
   },
   credentials:true,
   methods:['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders:['Content-Type','Authorization']
-}));
+  allowedHeaders:['Content-Type','Authorization'],
+  optionsSuccessStatus:204
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit:'2mb' }));
 app.use(express.urlencoded({ extended:true }));
 app.use(rateLimit({ windowMs:15*60*1000, max:500, standardHeaders:true, legacyHeaders:false }));
